@@ -7,38 +7,42 @@
 /contract/get_set_helloworld/.stellar
 
 #NextJS
-/web/node_modules/
-/web/.pnp
-/web/.pnp.js
+# dependencies
+/web/get_set/node_modules
+/web/get_set/.pnp
+/web/get_set.pnp.*
+/web/get_set.yarn/*
+/web/get_set!.yarn/patches
+/web/get_set!.yarn/plugins
+/web/get_set!.yarn/releases
+/web/get_set!.yarn/versions
 
 # testing
-/web//coverage
+/web/get_set/coverage
 
 # next.js
-/web/.next/
-/web/out/
+/web/get_set/.next/
+/web/get_set/out/
 
 # production
-/web/build
+/web/get_set/build
 
 # misc
-/web/.DS_Store
-/web/*.pem
+/web/get_set.DS_Store
+/web/get_set*.pem
 
 # debug
-/web/npm-debug.log*
-/web/yarn-debug.log*
-/web/yarn-error.log*
-/web/.pnpm-debug.log*
+/web/get_setnpm-debug.log*
+/web/get_setyarn-debug.log*
+/web/get_setyarn-error.log*
+/web/get_set.pnpm-debug.log*
 
-# local env files
-/web/.env*.local
+# env files (can opt-in for committing if needed)
+/web/get_set.env*
 
 # vercel
-/web/.vercel
+/web/get_set.vercel
 
 # typescript
-/web/*.tsbuildinfo
-/web/next-env.d.ts
-
-# End of https://www.toptal.com/developers/gitignore/api/nextjs
+/web/get_set/*.tsbuildinfo
+/web/get_set/next-env.d.ts
