@@ -36,3 +36,4 @@ echo "=== Verificando instalación de Git ==="
 git --version
 echo "=== Instalación completada correctamente ==="
 source ~/.bashrc
+pip install -U stellar-sdk
