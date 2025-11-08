@@ -6,7 +6,7 @@ Contrato inteligente simple desarrollado en Rust para la blockchain de Stellar u
 ##Creacion de una cuenta
 
 ```plaintext
-stellar keys generate <identity>
+stellar keys generate <identity> --network testnet --fund
 ```
 saber cual es la cuenta:
 ```plaintext
