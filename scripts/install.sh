@@ -5,7 +5,7 @@ echo "=== Instalación automática de Stellar CLI en Ubuntu (Bash) ==="
 
 # 1. Actualizar repositorios e instalar dependencias básicas (sin pedir confirmación)
 sudo apt-get update -y
-sudo apt-get install -y curl build-essential git
+sudo apt-get install -y curl build-essential git python3.12
 
 # 2. Instalar Rust mediante rustup en modo desatendido
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
@@ -28,6 +28,7 @@ echo "=== Verificando instalación de Rust ==="
 rustc --version || { echo "Error: Rust no se instaló correctamente"; exit 1; }
 cargo --version || { echo "Error: Cargo no se instaló correctamente"; exit 1; }
 rustup --version || { echo "Error: rustup no se instaló correctamente"; exit 1; }
+python3 --version || { echo "Error: python no se instaló correctamente"; exit 1; }
 
 echo "=== Verificando instalación de Stellar CLI ==="
 stellar --version || { echo "Error: Stellar CLI no se instaló correctamente"; exit 1; }
@@ -35,5 +36,7 @@ stellar --version || { echo "Error: Stellar CLI no se instaló correctamente"; e
 echo "=== Verificando instalación de Git ==="
 git --version
 echo "=== Instalación completada correctamente ==="
-source ~/.bashrc
+
 pip install -U stellar-sdk
+
+exec "$SHELL"
