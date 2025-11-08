@@ -23,7 +23,7 @@
 2. Abre la terminal integrada y ejecuta:
 
 ```bash
-bash /scripts/install.sh
+bash ./scripts/install.sh
 ```
 
 3. Cuando termine, revisa los `README.md` dentro de las carpetas de ejemplos para aprender a compilar, desplegar y ejecutar el contrato desde cada cliente 🌈
