@@ -1,0 +1,10 @@
+[network.testnet]
+rpc_url = "https://soroban-testnet.stellar.org"
+network_passphrase = "Test SDF Network ; September 2015"
+
+[accounts.testnet.default]
+# Reemplaza con tu secret key de la cuenta multisig (genera abajo)
+
+[contracts.testnet.block_resources]
+local = ["sc://local"]
+r#remote = ["<CONTRACT_ID>"]  # Se llena post-deploy
