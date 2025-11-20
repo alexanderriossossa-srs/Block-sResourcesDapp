@@ -1,0 +1,9 @@
+[networks.testnet]
+rpc_url = "https://soroban-testnet.stellar.org"
+network_passphrase = "Test SDF Network ; September 2015"
+
+[accounts.testnet.multisig]
+secret_key = "<TU_SECRET_MULTISIG>"  # Agrega post-generación
+
+[contracts.testnet.block_resources]
+wasm_hash = "<WASM_HASH_POST_BUILD>"  # Opcional
