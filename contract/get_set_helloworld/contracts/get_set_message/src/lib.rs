@@ -1,65 +1,79 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, symbol_short, Env, String, Symbol};
 
-// Clave para almacenar el mensaje en el storage del contrato
-const MESSAGE: Symbol = symbol_short!("Message");
+use soroban_sdk::{contract, contractimpl, contracterror, Env, Address, Symbol, Bytes, Vec, Map, symbol_short, invoke};
 
-// TTL (Time To Live) de 10 minutos expresado en ledgers
-// En Stellar, cada ledger tarda aproximadamente 5 segundos
-// 120 ledgers * 5 segundos = 600 segundos = 10 minutos
-const TEN_MINUTES_IN_LEDGERS: u32 = 120;
+#[contracterror]
+#[derive(Copy)]
+#[repr(u32)]
+pub enum Error {
+    NotAuthorized = 1,
+    NotInitialized = 2,
+}
 
-/// Estructura principal del contrato de mensajes
+const ADMINS_KEY: Symbol = symbol_short!("admins");
+const RECEIVER_KEY: Symbol = symbol_short!("receiver");
+
 #[contract]
-pub struct MessageContract;
+pub struct BlocksResources;
 
 #[contractimpl]
-impl MessageContract {
-    /// Constructor que se ejecuta automáticamente al desplegar el contrato
-    /// 
-    /// # Parámetros
-    /// - `env`: Entorno de ejecución de Soroban
-    /// Este constructor inicializa el contrato con un mensaje predeterminado
-    pub fn __constructor(env: Env){
-        // Clonamos env porque set_message toma ownership del Env
-        // Inicializa el contrato con un mensaje de bienvenida
-        Self::set_message(env.clone(), String::from_str(&env, "Mi primer mensaje 🚀"));
+impl BlocksResources {
+    /// Inicializa el contrato con admins (multisig implícito en tx) y receptor.
+    pub fn initialize(env: Env, admin1: Address, admin2: Address, receiver: Address) {
+        if env.storage().instance().has(&RECEIVER_KEY) {
+            panic!("Ya inicializado");
+        }
+        let mut admins: Vec<Address> = Vec::new(&env);
+        admins.push(admin1);
+        admins.push(admin2);
+        env.storage().instance().set(&ADMINS_KEY, admins);
+        env.storage().instance().set(&RECEIVER_KEY, receiver);
+        // Evento de inicialización
+        (Symbol::short("init"), admin1, admin2, receiver).emit(&env);
     }
 
-    /// Almacena un mensaje en el storage del contrato con un TTL de 10 minutos
-    /// 
-    /// # Parámetros
-    /// - `env`: Entorno de ejecución de Soroban
-    /// - `message`: El mensaje a almacenar
-    /// 
-    /// El mensaje expirará automáticamente después de aproximadamente 10 minutos
-    /// debido a la configuración del TTL
-    pub fn set_message(env: Env, message: String) {
-        // Guarda el mensaje en el instance storage usando la clave MESSAGE
-        env.storage().instance().set(&MESSAGE, &message);
-        
-        // Extiende el TTL (tiempo de vida) del storage
-        // Primer parámetro: threshold - cuando quedan estos ledgers, se puede extender
-        // Segundo parámetro: extend_to - extiende el TTL hasta este número de ledgers
-        env.storage()
-            .instance()
-            .extend_ttl(TEN_MINUTES_IN_LEDGERS, TEN_MINUTES_IN_LEDGERS);
+    /// Registra un evento de trazabilidad para un recurso ambiental.
+    /// Requiere auth de admin (verificado en tx multisig).
+    pub fn log_trace(
+        env: Env,
+        resource_id: Bytes,  // ID del recurso, e.g., "RECURSO_001"
+        from: Address,       // Origen
+        to: Address,         // Destino
+        metadata: Map<Symbol, Bytes>,  // Metadata, e.g., { "tipo": "agua", "cantidad": "100L" }
+    ) {
+        let admins: Vec<Address> = env.storage().instance().get(&ADMINS_KEY).unwrap_or_else(|| panic!("No inicializado"));
+        let caller = env.invoker();
+        if !admins.contains(&caller) {
+            panic_error!(env, Error::NotAuthorized);
+        }
+        // Emitir evento para trazabilidad (visible en explorer)
+        (
+            Symbol::short("trace"),
+            resource_id,
+            from,
+            to,
+            env.block().timestamp(),
+            metadata,
+        ).emit(&env);
     }
 
-    /// Recupera el mensaje almacenado en el contrato
-    /// 
-    /// # Parámetros
-    /// - `env`: Entorno de ejecución de Soroban
-    /// 
-    /// # Retorna
-    /// El mensaje almacenado, o "Default Message" si no existe ningún mensaje
-    /// o si el TTL ha expirado
-    pub fn get_message(env: Env) -> String {
-        // Intenta obtener el mensaje del storage
-        env.storage()
-            .instance()
-            .get(&MESSAGE)
-            // Si no existe o expiró, retorna un mensaje por defecto
-            .unwrap_or(String::from_str(&env, "Default Message"))
+    /// Simula liberación de fondos: emite evento y permite tx con pago a receptor.
+    /// El pago real se hace vía extensión de tx (no en contrato).
+    pub fn release_funds(env: Env, resource_id: Bytes, amount: i128) {  // amount en stroops (1 XLM = 10^7 stroops)
+        let receiver: Address = env.storage().instance().get(&RECEIVER_KEY).unwrap_or_else(|| panic!("No inicializado"));
+        let admins: Vec<Address> = env.storage().instance().get(&ADMINS_KEY).unwrap_or_else(|| panic!("No inicializado"));
+        let caller = env.invoker();
+        if !admins.contains(&caller) {
+            panic_error!(env, Error::NotAuthorized);
+        }
+        // Emitir evento de liberación
+        (
+            Symbol::short("release"),
+            resource_id,
+            amount,
+            receiver,
+            env.block().timestamp(),
+        ).emit(&env);
+        // Nota: Para transferir fondos reales, usa --payment en soroban tx invoke.
     }
 }
