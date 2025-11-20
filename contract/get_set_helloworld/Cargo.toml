@@ -1,13 +1,8 @@
-[package]
-name = "block_resources"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+resolver = "2"
+members = [
+  "contracts/*",
+]
 
-[lib]
-crate-type = ["cdylib"]
-
-[dependencies]
-soroban-sdk = "21.2.0"  # Última versión al 20/11/2025
-
-[dev_dependencies]
-soroban-sdk = { version = "21.2.0", features = ["testutils"] }
+[workspace.dependencies]
+soroban-sdk = "22"
