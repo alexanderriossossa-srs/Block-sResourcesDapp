@@ -1,0 +1,5 @@
+{
+    "name": "Soroban Dev",
+    "image": "mcr.microsoft.com/devcontainers/rust:1-1-bullseye",
+    "postCreateCommand": "rustup target add wasm32-unknown-unknown && curl -sSfL https://soroban.stellar.org/releases/v21.2.0/soroban-x86_64-unknown-linux-gnu.tar.gz | tar -xz && sudo mv soroban /usr/local/bin && soroban --version"
+}
